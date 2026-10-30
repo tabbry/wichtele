@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Wichtele | Private messages</title>
+  <style>
+    :root { --ink: #172a26; --muted: #52665f; --paper: #f5f8f6; --line: #cbd9d1; --green: #14604b; --accent: #c3ec67; --error: #a52a35; }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: var(--ink); background: var(--paper); background-image: linear-gradient(#14604b05 1px, transparent 1px), linear-gradient(90deg, #14604b05 1px, transparent 1px); background-size: 32px 32px; font-family: "Segoe UI", sans-serif; font-size: 15px; line-height: 1.55; letter-spacing: 0; }
+    header { border-bottom: 1px solid var(--line); background: #fff; }
+    .header-inner, main, footer { max-width: 1000px; margin: auto; padding: 22px 32px; }
+    .header-inner { display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+    .brand { font-family: Georgia, serif; font-size: 29px; font-weight: bold; }
+    .local { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; }
+    .local::before { content: ""; width: 7px; height: 7px; background: var(--green); border-radius: 50%; }
+    main { padding-top: 40px; padding-bottom: 36px; }
+    .intro { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 30px; }
+    h1 { margin: 0; font-family: Georgia, serif; font-size: 34px; font-weight: normal; }
+    h2 { margin: 0; font-size: 17px; font-weight: 650; }
+    .eyebrow { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0; }
+    section { border-top: 1px solid var(--line); padding: 25px 0 30px; }
+    .section-heading { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+    .step { display: grid; place-items: center; width: 26px; height: 26px; flex: 0 0 26px; background: var(--ink); color: #fff; font-size: 12px; border-radius: 50%; }
+    .credentials { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+    input, textarea { display: block; width: 100%; min-width: 0; border: 1px solid var(--line); border-radius: 6px; background: #fff; padding: 12px 14px; color: var(--ink); font: inherit; outline: none; transition: border-color .15s, box-shadow .15s; }
+    input:focus, textarea:focus { border-color: var(--green); box-shadow: 0 0 0 3px #14604b14; }
+    textarea { resize: vertical; min-height: 135px; overflow-wrap: anywhere; }
+    textarea[readonly] { background: #eaf0ec; }
+    textarea.mono { font-family: Consolas, monospace; font-size: 13px; }
+    #public-key { min-height: 86px; }
+    #plaintext { min-height: 165px; }
+    .field-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 20px 0 8px; }
+    .field-heading label { margin: 0; }
+    button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 36px; padding: 7px 12px; border: 1px solid var(--line); border-radius: 5px; background: #fff; color: var(--ink); cursor: pointer; font: inherit; font-size: 13px; font-weight: 600; }
+    button:hover:enabled { border-color: var(--green); background: #edf5ef; }
+    button:focus-visible, summary:focus-visible { outline: 3px solid var(--green); outline-offset: 3px; }
+    button:disabled { opacity: .45; cursor: not-allowed; }
+    button svg { width: 15px; height: 15px; flex: 0 0 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .primary { background: var(--green); border-color: var(--green); color: #fff; }
+    .primary:hover:enabled { background: #104c3c; color: #fff; }
+    .status { min-height: 23px; margin: 10px 0 0; color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
+    .status[data-state="error"] { color: var(--error); }
+    .status[data-state="success"] { color: var(--green); }
+    .message-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .message-grid .field-heading { margin-top: 0; min-height: 36px; }
+    #encrypted-message { min-height: 165px; }
+    .security-note { border-left: 3px solid var(--accent); margin: 12px 0 0; padding: 3px 0 3px 13px; color: var(--muted); font-size: 12px; max-width: 760px; }
+    details { border-top: 1px solid var(--line); padding-top: 20px; }
+    summary { cursor: pointer; font-weight: 600; font-size: 14px; width: fit-content; }
+    .sender { padding-top: 18px; }
+    .sender label { margin-top: 16px; }
+    .sender-actions { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 10px; }
+    details { padding-bottom: 20px; }
+    .operator-body { padding-top: 20px; }
+    .operator-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 20px 0 12px; }
+    .count { color: var(--muted); font-size: 12px; }
+    .assignment { display: grid; grid-template-columns: minmax(0, 160px) minmax(0, 1fr) 78px 78px; align-items: center; gap: 8px; border-top: 1px solid var(--line); padding: 8px 0; }
+    .assignment label { margin: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+    .assignment input { height: 36px; padding: 7px 10px; background: #eaf0ec; font-family: Consolas, monospace; font-size: 13px; text-overflow: ellipsis; }
+    .assignment button { width: 78px; padding: 7px; }
+    .assignment .status { grid-column: 1 / -1; margin: 0; }
+    .assignment .status:not([data-state="error"]) { position: absolute; width: 1px; height: 1px; min-height: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+    footer { display: flex; justify-content: space-between; gap: 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+    @media (max-width: 640px) {
+      .header-inner, main, footer { padding-left: 20px; padding-right: 20px; }
+      main { padding-top: 28px; }
+      .credentials, .message-grid { grid-template-columns: 1fr; gap: 16px; }
+      h1 { font-size: 29px; }
+      .local { max-width: 120px; }
+      footer { flex-wrap: wrap; }
+      .assignment { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 44px 44px; gap: 6px; }
+      .assignment button { width: 44px; }
+      .assignment button span { display: none; }
+    }
+    @media (prefers-reduced-motion: no-preference) { main { animation: arrive .35s ease-out; } @keyframes arrive { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } } }
+  </style>
+</head>
+<body>
+  <header><div class="header-inner"><div class="brand">Wichtele<span style="color:var(--green)">.</span></div><div class="local">Local cryptography</div></div></header>
+  <main>
+    <div class="intro"><h1>Private messages</h1><span class="eyebrow">X25519 / AES-256-GCM</span></div>
+    <section aria-labelledby="identity-heading">
+      <div class="section-heading"><span class="step" aria-hidden="true">1</span><h2 id="identity-heading">Your identity</h2></div>
+      <form id="credentials" autocomplete="off">
+        <div class="credentials">
+          <div><label for="username">Username</label><input id="username" name="username" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="256"></div>
+          <div><label for="password">Password</label><input id="password" name="password" type="password" autocomplete="off" maxlength="4096"></div>
+        </div>
+      </form>
+      <div class="field-heading"><label for="public-key">Public key</label><button id="copy-key" type="button" disabled title="Copy public key"><svg aria-hidden="true" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>Copy</button></div>
+      <textarea id="public-key" class="mono" readonly spellcheck="false" aria-describedby="identity-status"></textarea>
+      <p class="status" id="identity-status" role="status" aria-live="polite">Enter your credentials.</p>
+      <p class="security-note">Use a long, unique passphrase. Anyone with your public key can test password guesses offline. Forgotten credentials cannot be recovered. Usernames are case-sensitive; surrounding spaces are ignored.</p>
+    </section>
+    <section aria-labelledby="message-heading">
+      <div class="section-heading"><span class="step" aria-hidden="true">2</span><h2 id="message-heading">Open a message</h2></div>
+      <div class="message-grid">
+        <div><div class="field-heading"><label for="encrypted-message">Encrypted message</label></div><textarea id="encrypted-message" class="mono" spellcheck="false" autocapitalize="none" aria-describedby="decrypt-status"></textarea></div>
+        <div><div class="field-heading"><label for="plaintext">Decrypted message</label><button id="copy-plaintext" type="button" disabled title="Copy decrypted message"><svg aria-hidden="true" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>Copy</button></div><textarea id="plaintext" readonly aria-describedby="decrypt-status"></textarea></div>
+      </div>
+      <p class="status" id="decrypt-status" role="status" aria-live="polite">No message loaded.</p>
+    </section>
+    <details>
+      <summary>Encrypt a message</summary>
+      <div class="sender">
+        <label for="recipient">Recipient public key</label><input id="recipient" spellcheck="false" autocapitalize="none" autocomplete="off">
+        <label for="outgoing-message">Message</label><textarea id="outgoing-message" maxlength="1000000"></textarea>
+        <div class="sender-actions"><button id="encrypt" class="primary" type="button">Encrypt message</button><button id="copy-envelope" type="button" disabled title="Copy encrypted message"><svg aria-hidden="true" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>Copy encrypted message</button><button id="copy-message-link" type="button" disabled>Copy message link</button></div>
+        <label for="outgoing-envelope">Encrypted message</label><textarea id="outgoing-envelope" class="mono" readonly spellcheck="false"></textarea>
+        <p class="status" id="encrypt-status" role="status" aria-live="polite"></p>
+      </div>
+    </details>
+    <details id="operator">
+      <summary>Assignment desk</summary>
+      <div class="operator-body">
+        <div class="operator-heading"><h2>Participants</h2><span class="count" id="participant-count">0 keys</span></div>
+        <label for="public-keys">Public keys</label>
+        <textarea id="public-keys" class="mono" spellcheck="false" autocapitalize="none" autocomplete="off" aria-describedby="draw-status"></textarea>
+        <div class="sender-actions"><button id="draw" class="primary" type="button">Create assignments</button><button id="clear-draw" type="button">Clear assignments</button></div>
+        <p class="status" id="draw-status" role="status" aria-live="polite">At least two participants required.</p>
+        <div class="operator-heading"><h2>Encrypted assignments</h2><span class="count" id="result-count">0 messages</span></div>
+        <div id="results" aria-busy="false"></div>
+      </div>
+    </details>
+  </main>
+  <footer><span>No network requests. No application storage.</span><button id="clear" type="button">Clear all</button></footer>
+  <template id="assignment-template">
+    <article class="assignment">
+      <label></label><input type="text" readonly spellcheck="false">
+      <button type="button" class="copy-assignment" title="Copy encrypted message"><svg aria-hidden="true" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg><span>Copy</span></button>
+      <button type="button" class="copy-link" title="Copy assignment link"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m10 13 4-4m-6 7-1 1a4 4 0 0 1-6-6l4-4a4 4 0 0 1 6 0m2 1 1-1a4 4 0 0 1 6 6l-4 4a4 4 0 0 1-6 0"/></svg><span>Link</span></button>
+      <p class="status" role="status" aria-live="polite"></p>
+    </article>
+  </template>
+  <script>
+    'use strict';
+
+    const element = (id) => document.getElementById(id);
+    const encoder = new TextEncoder();
+    const decoder = new TextDecoder('utf-8', { fatal: true });
+    const KEY_PREFIX = 'wichtele:x25519:v2:';
+    const MESSAGE_PREFIX = 'wichtele:message:v1:';
+    const ITERATIONS = 600000;
+    const MAX_ENVELOPE_LENGTH = 2000000;
+    let identity = null;
+    let identityVersion = 0;
+    let decryptVersion = 0;
+    let encryptVersion = 0;
+    let identityTimer;
+    let decryptTimer;
+
+    function status(id, text, state = '') {
+      element(id).textContent = text;
+      element(id).dataset.state = state;
+    }
+
+    function base64url(bytes) {
+      let binary = '';
+      for (const byte of new Uint8Array(bytes)) binary += String.fromCharCode(byte);
+      return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    }
+
+    function fromBase64url(text) {
+      if (typeof text !== 'string' || !/^[A-Za-z0-9_-]+$/.test(text) || text.length % 4 === 1) throw new Error('Invalid encoding.');
+      const binary = atob(text.replace(/-/g, '+').replace(/_/g, '/'));
+      const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+      if (base64url(bytes) !== text) throw new Error('Invalid encoding.');
+      return bytes;
+    }
+
+    async function deriveIdentity(username, password) {
+      const material = await crypto.subtle.importKey('raw', encoder.encode(password), 'PBKDF2', false, ['deriveBits']);
+      const seed = new Uint8Array(await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: encoder.encode('wichtele:identity:v1:' + username.trim()), iterations: ITERATIONS }, material, 256));
+      const pkcs8 = new Uint8Array(48);
+      pkcs8.set([0x30, 0x2e, 0x02, 0x01, 0x00, 0x30, 0x05, 0x06, 0x03, 0x2b, 0x65, 0x6e, 0x04, 0x22, 0x04, 0x20]);
+      pkcs8.set(seed, 16);
+      try {
+        const exportable = await crypto.subtle.importKey('pkcs8', pkcs8, 'X25519', true, ['deriveBits']);
+        const publicJwk = await crypto.subtle.exportKey('jwk', exportable);
+        const privateKey = await crypto.subtle.importKey('pkcs8', pkcs8, 'X25519', false, ['deriveBits']);
+        return { privateKey, publicKey: KEY_PREFIX + encodeURIComponent(username.trim()) + ':' + publicJwk.x };
+      } finally {
+        seed.fill(0);
+        pkcs8.fill(0);
+      }
+    }
+
+    async function messageKey(privateKey, publicKey, nonce, usage) {
+      const shared = new Uint8Array(await crypto.subtle.deriveBits({ name: 'X25519', public: publicKey }, privateKey, 256));
+      try {
+        const material = await crypto.subtle.importKey('raw', shared, 'HKDF', false, ['deriveKey']);
+        return await crypto.subtle.deriveKey({ name: 'HKDF', hash: 'SHA-256', salt: nonce, info: encoder.encode(MESSAGE_PREFIX) }, material, { name: 'AES-GCM', length: 256 }, false, [usage]);
+      } finally { shared.fill(0); }
+    }
+
+    async function encryptMessage(publicKeyText, plaintext) {
+      if (!publicKeyText.startsWith(KEY_PREFIX)) throw new Error('Use a Wichtele v2 public key.');
+      const parts = publicKeyText.slice(KEY_PREFIX.length).split(':');
+      if (parts.length !== 2) throw new Error('Invalid public key.');
+      const username = decodeURIComponent(parts[0]);
+      if (!username.trim() || username !== username.trim() || username.length > 256 || encodeURIComponent(username) !== parts[0]) throw new Error('Invalid public key username.');
+      const recipientBytes = fromBase64url(parts[1]);
+      if (recipientBytes.length !== 32) throw new Error('Invalid public key.');
+      const recipient = await crypto.subtle.importKey('raw', recipientBytes, 'X25519', false, []);
+      const ephemeral = await crypto.subtle.generateKey('X25519', true, ['deriveBits']);
+      const nonce = crypto.getRandomValues(new Uint8Array(12));
+      const key = await messageKey(ephemeral.privateKey, recipient, nonce, 'encrypt');
+      const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: nonce, additionalData: encoder.encode(MESSAGE_PREFIX), tagLength: 128 }, key, encoder.encode(plaintext));
+      const envelope = { ephemeral: base64url(await crypto.subtle.exportKey('raw', ephemeral.publicKey)), nonce: base64url(nonce), ciphertext: base64url(ciphertext) };
+      const result = MESSAGE_PREFIX + base64url(encoder.encode(JSON.stringify(envelope)));
+      if (result.length > MAX_ENVELOPE_LENGTH) throw new Error('Message is too large.');
+      return result;
+    }
+
+    async function decryptMessage(privateKey, message) {
+      if (message.length > MAX_ENVELOPE_LENGTH) throw new Error('Message is too large.');
+      if (!message.startsWith(MESSAGE_PREFIX)) throw new Error('Use a Wichtele v1 encrypted message.');
+      const envelope = JSON.parse(decoder.decode(fromBase64url(message.slice(MESSAGE_PREFIX.length))));
+      if (!envelope || typeof envelope !== 'object') throw new Error('Invalid message.');
+      const publicBytes = fromBase64url(envelope.ephemeral);
+      const nonce = fromBase64url(envelope.nonce);
+      const ciphertext = fromBase64url(envelope.ciphertext);
+      if (publicBytes.length !== 32 || nonce.length !== 12 || ciphertext.length < 16) throw new Error('Invalid message.');
+      const ephemeral = await crypto.subtle.importKey('raw', publicBytes, 'X25519', false, []);
+      const key = await messageKey(privateKey, ephemeral, nonce, 'decrypt');
+      const plaintext = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: nonce, additionalData: encoder.encode(MESSAGE_PREFIX), tagLength: 128 }, key, ciphertext);
+      return decoder.decode(plaintext);
+    }
+
+    function clearPlaintext() {
+      element('plaintext').value = '';
+      element('copy-plaintext').disabled = true;
+    }
+
+    async function openMessage() {
+      const version = ++decryptVersion;
+      const currentIdentity = identity;
+      const message = element('encrypted-message').value.trim();
+      clearPlaintext();
+      if (!message) return status('decrypt-status', 'No message loaded.');
+      if (!currentIdentity) return status('decrypt-status', 'Waiting for your identity.');
+      status('decrypt-status', 'Decrypting...');
+      try {
+        const plaintext = await decryptMessage(currentIdentity.privateKey, message);
+        if (version !== decryptVersion) return;
+        element('plaintext').value = plaintext;
+        element('copy-plaintext').disabled = false;
+        status('decrypt-status', 'Message decrypted. Sender identity is not verified.', 'success');
+      } catch {
+        if (version === decryptVersion) status('decrypt-status', 'Cannot decrypt: wrong credentials, damaged message, or unsupported format.', 'error');
+      }
+    }
+
+    function scheduleIdentity() {
+      const version = ++identityVersion;
+      ++decryptVersion;
+      clearTimeout(identityTimer);
+      identity = null;
+      element('public-key').value = '';
+      element('copy-key').disabled = true;
+      clearPlaintext();
+      const username = element('username').value;
+      const password = element('password').value;
+      status('decrypt-status', element('encrypted-message').value.trim() ? 'Waiting for your identity.' : 'No message loaded.');
+      if (!username.trim() || !password) return status('identity-status', 'Enter your credentials.');
+      status('identity-status', 'Deriving your key...');
+      identityTimer = setTimeout(async () => {
+        try {
+          const result = await deriveIdentity(username, password);
+          if (version !== identityVersion) return;
+          identity = result;
+          element('public-key').value = result.publicKey;
+          element('copy-key').disabled = false;
+          status('identity-status', 'Public key ready.', 'success');
+          await openMessage();
+        } catch {
+          if (version === identityVersion) status('identity-status', 'Key generation failed. Use a current browser with X25519 support in a secure context (local file, localhost, or HTTPS).', 'error');
+        }
+      }, 350);
+    }
+
+    async function copyField(fieldId, statusId) {
+      const field = element(fieldId);
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(field.value);
+        } else {
+          field.focus();
+          field.select();
+          if (!document.execCommand('copy')) throw new Error('Clipboard unavailable.');
+        }
+        status(statusId, 'Copied to clipboard.', 'success');
+      } catch {
+        field.focus();
+        field.select();
+        status(statusId, 'Clipboard unavailable. Selected text can be copied manually.', 'error');
+      }
+    }
+
+    element('credentials').addEventListener('submit', (event) => event.preventDefault());
+    element('username').addEventListener('input', scheduleIdentity);
+    element('password').addEventListener('input', scheduleIdentity);
+    element('encrypted-message').addEventListener('input', () => {
+      ++decryptVersion;
+      clearPlaintext();
+      clearTimeout(decryptTimer);
+      decryptTimer = setTimeout(openMessage, 100);
+    });
+    element('copy-key').addEventListener('click', () => copyField('public-key', 'identity-status'));
+    element('copy-plaintext').addEventListener('click', () => copyField('plaintext', 'decrypt-status'));
+    element('copy-envelope').addEventListener('click', () => copyField('outgoing-envelope', 'encrypt-status'));
+
+    function invalidateOutgoing() {
+      ++encryptVersion;
+      element('outgoing-envelope').value = '';
+      element('copy-envelope').disabled = true;
+      element('copy-message-link').disabled = true;
+      element('encrypt').disabled = false;
+      status('encrypt-status', '');
+    }
+
+    element('recipient').addEventListener('input', invalidateOutgoing);
+    element('outgoing-message').addEventListener('input', invalidateOutgoing);
+    element('encrypt').addEventListener('click', async () => {
+      invalidateOutgoing();
+      const version = encryptVersion;
+      const recipient = element('recipient').value.trim();
+      const plaintext = element('outgoing-message').value;
+      if (!recipient || !plaintext) return status('encrypt-status', 'Enter a recipient public key and a message.', 'error');
+      element('encrypt').disabled = true;
+      status('encrypt-status', 'Encrypting...');
+      try {
+        const envelope = await encryptMessage(recipient, plaintext);
+        if (version !== encryptVersion) return;
+        element('outgoing-envelope').value = envelope;
+        element('copy-envelope').disabled = false;
+        element('copy-message-link').disabled = false;
+        status('encrypt-status', 'Message encrypted.', 'success');
+      } catch (error) {
+        if (version === encryptVersion) status('encrypt-status', error.message || 'Encryption failed.', 'error');
+      } finally {
+        if (version === encryptVersion) element('encrypt').disabled = false;
+      }
+    });
+
+    element('clear').addEventListener('click', () => {
+      ++identityVersion;
+      ++decryptVersion;
+      clearTimeout(identityTimer);
+      clearTimeout(decryptTimer);
+      identity = null;
+      if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+      document.querySelectorAll('input, textarea').forEach((field) => { field.value = ''; });
+      clearDraw();
+      element('copy-key').disabled = true;
+      clearPlaintext();
+      invalidateOutgoing();
+      status('identity-status', 'Enter your credentials.');
+      status('decrypt-status', 'No message loaded.');
+      element('username').focus();
+    });
+
+    let drawVersion = 0;
+    const supported = window.isSecureContext && Boolean(globalThis.crypto?.subtle);
+
+    function messageLink(username, message) {
+      const url = new URL(location.href);
+      url.search = '';
+      url.hash = new URLSearchParams({ username, message }).toString();
+      return url.href;
+    }
+
+    async function copyValue(value, feedback) {
+      const temporary = document.createElement('textarea');
+      temporary.value = value;
+      temporary.style.cssText = 'position:fixed;left:0;top:0;width:1px;height:1px;opacity:0';
+      document.body.append(temporary);
+      try {
+        if (navigator.clipboard && window.isSecureContext) await navigator.clipboard.writeText(value);
+        else {
+          temporary.focus();
+          temporary.select();
+          if (!document.execCommand('copy')) throw new Error('Clipboard unavailable.');
+        }
+        feedback.textContent = 'Copied to clipboard.';
+        feedback.dataset.state = 'success';
+      } catch {
+        feedback.textContent = 'Clipboard unavailable. Copy the text below manually.';
+        feedback.dataset.state = 'error';
+        const fallback = document.createElement('textarea');
+        fallback.value = value;
+        fallback.readOnly = true;
+        feedback.append(fallback);
+        fallback.focus();
+        fallback.select();
+      } finally { temporary.remove(); }
+    }
+
+    element('copy-message-link').addEventListener('click', () => {
+      const username = decodeURIComponent(element('recipient').value.trim().slice(KEY_PREFIX.length).split(':')[0]);
+      copyValue(messageLink(username, element('outgoing-envelope').value), element('encrypt-status'));
+    });
+
+    function parseParticipants(text) {
+      const tokens = text.trim() ? text.trim().split(/\s+/u) : [];
+      if (tokens.length < 2) throw new Error('At least two participants required.');
+      const usernames = new Set();
+      const keys = new Set();
+      return tokens.map((publicKey, index) => {
+        try {
+          if (!publicKey.startsWith(KEY_PREFIX)) throw new Error('Use a Wichtele v2 public key.');
+          const parts = publicKey.slice(KEY_PREFIX.length).split(':');
+          if (parts.length !== 2) throw new Error('Invalid public key.');
+          const username = decodeURIComponent(parts[0]);
+          if (!username.trim() || username !== username.trim() || username.length > 256 || encodeURIComponent(username) !== parts[0]) throw new Error('Invalid username.');
+          if (fromBase64url(parts[1]).length !== 32) throw new Error('Invalid public key length.');
+          if (usernames.has(username)) throw new Error('Duplicate username.');
+          if (keys.has(parts[1])) throw new Error('Duplicate public key.');
+          usernames.add(username);
+          keys.add(parts[1]);
+          return { username, publicKey };
+        } catch (error) { throw new Error('Key ' + (index + 1) + ': ' + error.message); }
+      });
+    }
+
+    function randomBelow(limit) {
+      const range = 0x100000000;
+      const ceiling = range - range % limit;
+      const sample = new Uint32Array(1);
+      do { crypto.getRandomValues(sample); } while (sample[0] >= ceiling);
+      return sample[0] % limit;
+    }
+
+    function createMapping(count) {
+      if (!Number.isInteger(count) || count < 2 || count > 0xffffffff) throw new Error('Invalid participant count.');
+      let targets;
+      do {
+        targets = Array.from({ length: count }, (_, index) => index);
+        for (let position = count - 1; position > 0; position--) {
+          const swap = randomBelow(position + 1);
+          [targets[position], targets[swap]] = [targets[swap], targets[position]];
+        }
+      } while (targets.some((target, source) => target === source));
+      return targets;
+    }
+
+    function clearDraw() {
+      ++drawVersion;
+      element('results').replaceChildren();
+      element('results').setAttribute('aria-busy', 'false');
+      element('result-count').textContent = '0 messages';
+      element('draw').textContent = 'Create assignments';
+      element('draw').disabled = !supported;
+      const count = element('public-keys').value.trim().split(/\s+/u).filter(Boolean).length;
+      element('participant-count').textContent = count + ' keys';
+      status('draw-status', supported ? 'At least two participants required.' : 'Web Crypto unavailable.', supported ? '' : 'error');
+    }
+
+    element('public-keys').addEventListener('input', clearDraw);
+    element('clear-draw').addEventListener('click', () => {
+      element('public-keys').value = '';
+      clearDraw();
+    });
+    element('draw').addEventListener('click', async () => {
+      if (element('results').childElementCount && !window.confirm('Replace all encrypted assignments? Previously distributed messages will no longer match this draw.')) return;
+      clearDraw();
+      const version = drawVersion;
+      element('draw').disabled = true;
+      element('results').setAttribute('aria-busy', 'true');
+      try {
+        const participants = parseParticipants(element('public-keys').value);
+        const targets = createMapping(participants.length);
+        const fragment = document.createDocumentFragment();
+        for (let source = 0; source < participants.length; source++) {
+          if (version !== drawVersion) return;
+          status('draw-status', 'Encrypting assignment ' + (source + 1) + ' of ' + participants.length + '...');
+          const participant = participants[source];
+          const message = await encryptMessage(participant.publicKey, participants[targets[source]].username);
+          const row = element('assignment-template').content.cloneNode(true);
+          const field = row.querySelector('input');
+          const label = row.querySelector('label');
+          const feedback = row.querySelector('.status');
+          field.id = 'assignment-' + source;
+          field.value = message;
+          label.htmlFor = field.id;
+          label.textContent = 'For ' + participant.username;
+          label.title = participant.username;
+          const copy = row.querySelector('.copy-assignment');
+          const link = row.querySelector('.copy-link');
+          copy.setAttribute('aria-label', 'Copy message for ' + participant.username);
+          link.setAttribute('aria-label', 'Copy link for ' + participant.username);
+          copy.addEventListener('click', () => copyValue(message, feedback));
+          link.addEventListener('click', () => copyValue(messageLink(participant.username, message), feedback));
+          fragment.append(row);
+        }
+        if (version !== drawVersion) return;
+        element('results').replaceChildren(fragment);
+        element('result-count').textContent = participants.length + ' messages';
+        element('draw').textContent = 'Regenerate assignments';
+        status('draw-status', 'Assignments ready. Every participant gives once and receives once; no self-matches.', 'success');
+      } catch (error) {
+        if (version === drawVersion) status('draw-status', 'No assignments created. ' + (error.name === 'OperationError' ? 'A public key cannot be used for encryption.' : error.message), 'error');
+      } finally {
+        if (version === drawVersion) {
+          element('draw').disabled = !supported;
+          element('results').setAttribute('aria-busy', 'false');
+        }
+      }
+    });
+
+    function loadMessageLink() {
+      if (!location.hash) return;
+      ++identityVersion;
+      ++decryptVersion;
+      clearTimeout(identityTimer);
+      identity = null;
+      element('password').value = '';
+      element('username').value = '';
+      element('public-key').value = '';
+      element('encrypted-message').value = '';
+      element('copy-key').disabled = true;
+      clearPlaintext();
+      try {
+        if (location.hash.length > MAX_ENVELOPE_LENGTH + 10000) throw new Error('Link is too large.');
+        const params = new URLSearchParams(location.hash.slice(1));
+        const username = params.get('username');
+        const message = params.get('message');
+        if (!username || username !== username.trim() || username.length > 256 || !message || message.length > MAX_ENVELOPE_LENGTH || !message.startsWith(MESSAGE_PREFIX)) throw new Error('Invalid message link.');
+        element('username').value = username;
+        element('encrypted-message').value = message;
+        status('identity-status', 'Enter your password.');
+        status('decrypt-status', 'Message loaded. Waiting for your password.');
+        element('password').focus();
+      } catch {
+        status('decrypt-status', 'Cannot load this message link: missing or invalid username or encrypted message.', 'error');
+      }
+    }
+
+    window.addEventListener('hashchange', loadMessageLink);
+    loadMessageLink();
+
+    if (!supported) {
+      status('identity-status', 'Web Crypto is unavailable. Open this file locally or use localhost or HTTPS in a current browser.', 'error');
+      element('encrypt').disabled = true;
+      element('draw').disabled = true;
+    }
+  </script>
+</body>
+</html>

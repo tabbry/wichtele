@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Wichtele | Assignment desk</title>
+  <script>
+    const destination = new URL('index.html', location.href);
+    destination.hash = location.hash;
+    location.replace(destination.href);
+  </script>
+  <style>
+    :root { --ink: #172a26; --muted: #52665f; --paper: #f5f8f6; --line: #cbd9d1; --green: #14604b; --error: #a52a35; }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: var(--ink); background: var(--paper); background-image: linear-gradient(#14604b05 1px, transparent 1px), linear-gradient(90deg, #14604b05 1px, transparent 1px); background-size: 32px 32px; font-family: "Segoe UI", sans-serif; font-size: 15px; line-height: 1.55; letter-spacing: 0; }
+    header { border-bottom: 1px solid var(--line); background: #fff; }
+    .header-inner, main, footer { max-width: 1000px; margin: auto; padding: 22px 32px; }
+    .header-inner { display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+    .brand { font-family: Georgia, serif; font-size: 29px; font-weight: bold; }
+    .brand span { color: var(--green); }
+    .local { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; }
+    .local::before { content: ""; width: 7px; height: 7px; background: var(--green); border-radius: 50%; flex-shrink: 0; }
+    main { padding-top: 40px; padding-bottom: 36px; }
+    .intro, .section-heading, .result-heading, .actions { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .intro { margin-bottom: 30px; align-items: baseline; }
+    h1 { margin: 0; font-family: Georgia, serif; font-size: 34px; font-weight: normal; }
+    h2 { margin: 0; font-size: 17px; font-weight: 650; }
+    .eyebrow, .count { color: var(--muted); font-size: 12px; }
+    .eyebrow { text-transform: uppercase; }
+    section { border-top: 1px solid var(--line); padding: 25px 0 30px; }
+    .section-heading { margin-bottom: 20px; }
+    label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+    textarea { display: block; width: 100%; min-width: 0; min-height: 200px; border: 1px solid var(--line); border-radius: 6px; background: #fff; padding: 12px 14px; color: var(--ink); font-family: Consolas, monospace; font-size: 13px; line-height: 1.6; resize: vertical; overflow-wrap: anywhere; outline: none; }
+    textarea:focus { border-color: var(--green); box-shadow: 0 0 0 3px #14604b14; }
+    .result input { width: 100%; min-width: 0; height: 36px; border: 1px solid var(--line); border-radius: 5px; background: #eaf0ec; padding: 7px 10px; color: var(--ink); font-family: Consolas, monospace; font-size: 13px; text-overflow: ellipsis; }
+    .result input:focus { outline: 2px solid var(--green); outline-offset: 1px; }
+    button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 36px; padding: 7px 12px; border: 1px solid var(--line); border-radius: 5px; background: #fff; color: var(--ink); cursor: pointer; font: inherit; font-size: 13px; font-weight: 600; }
+    button:hover:enabled { border-color: var(--green); background: #edf5ef; }
+    button:focus-visible { outline: 3px solid var(--green); outline-offset: 3px; }
+    button:disabled { opacity: .45; cursor: not-allowed; }
+    button svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .primary { background: var(--green); border-color: var(--green); color: #fff; }
+    .primary:hover:enabled { background: #104c3c; color: #fff; }
+    .actions { margin-top: 16px; justify-content: flex-start; }
+    .status { min-height: 23px; margin: 10px 0 0; color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
+    .status[data-state="error"] { color: var(--error); }
+    .status[data-state="success"] { color: var(--green); }
+    .result { display: grid; grid-template-columns: minmax(0, 180px) minmax(0, 1fr) 90px; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid var(--line); }
+    .result:first-child { border-top: 0; padding-top: 0; }
+    .result-heading { display: contents; }
+    .result-heading label { grid-column: 1; grid-row: 1; margin: 0; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+    .result input { grid-column: 2; grid-row: 1; }
+    .result-heading button { grid-column: 3; grid-row: 1; width: 90px; }
+    .result .status { grid-column: 1 / -1; margin: 0; }
+    .result .status:not([data-state="error"]) { position: absolute; width: 1px; height: 1px; min-height: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+    .empty { color: var(--muted); margin: 0; font-size: 14px; }
+    footer { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+    @media (max-width: 640px) { .header-inner, main, footer { padding-left: 20px; padding-right: 20px; } main { padding-top: 28px; } h1 { font-size: 29px; } .local { max-width: 120px; } .result { grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr) 90px; gap: 8px; } }
+  </style>
+</head>
+<body>
+  <header><div class="header-inner"><div class="brand">Wichtele<span>.</span></div><div class="local">Local cryptography</div></div></header>
+  <main>
+    <div class="intro"><h1>Assignment desk</h1><span class="eyebrow">Operator</span></div>
+    <section aria-labelledby="participants-heading">
+      <div class="section-heading"><h2 id="participants-heading">Participants</h2><span class="count" id="participant-count">0 keys</span></div>
+      <label for="public-keys">Public keys</label>
+      <textarea id="public-keys" spellcheck="false" autocapitalize="none" autocomplete="off" aria-describedby="draw-status"></textarea>
+      <div class="actions"><button id="draw" class="primary" type="button">Create assignments</button><button id="clear" type="button">Clear all</button></div>
+      <p class="status" id="draw-status" role="status" aria-live="polite">At least two participants required.</p>
+    </section>
+    <section aria-labelledby="results-heading" aria-busy="false" id="results-section">
+      <div class="section-heading"><h2 id="results-heading">Encrypted assignments</h2><span class="count" id="result-count">0 messages</span></div>
+      <div id="results"><p class="empty">No assignments yet.</p></div>
+    </section>
+  </main>
+  <footer><span>No network requests. No application storage.</span><span>X25519 / AES-256-GCM</span></footer>
+  <template id="result-template">
+    <article class="result">
+      <div class="result-heading"><label></label><button type="button" title="Copy encrypted assignment"><svg aria-hidden="true" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg><span>Copy</span></button></div>
+      <input type="text" readonly spellcheck="false">
+      <p class="status" role="status" aria-live="polite"></p>
+    </article>
+  </template>
+  <script>
+    'use strict';
+
+    const element = (id) => document.getElementById(id);
+    const encoder = new TextEncoder();
+    const KEY_PREFIX = 'wichtele:x25519:v2:';
+    const MESSAGE_PREFIX = 'wichtele:message:v1:';
+    let drawVersion = 0;
+    let hasAssignments = false;
+    const supported = window.isSecureContext && Boolean(globalThis.crypto?.subtle);
+
+    function status(text, state = '') {
+      element('draw-status').textContent = text;
+      element('draw-status').dataset.state = state;
+    }
+
+    function base64url(bytes) {
+      let binary = '';
+      for (const byte of new Uint8Array(bytes)) binary += String.fromCharCode(byte);
+      return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    }
+
+    function fromBase64url(text) {
+      if (typeof text !== 'string' || !/^[A-Za-z0-9_-]+$/.test(text) || text.length % 4 === 1) throw new Error('Invalid key encoding.');
+      const binary = atob(text.replace(/-/g, '+').replace(/_/g, '/'));
+      const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+      if (base64url(bytes) !== text) throw new Error('Invalid key encoding.');
+      return bytes;
+    }
+
+    function keyTokens(text) {
+      return text.trim() ? text.trim().split(/\s+/u) : [];
+    }
+
+    function parseParticipants(text) {
+      const tokens = keyTokens(text);
+      if (tokens.length < 2) throw new Error('At least two participants required.');
+      const usernames = new Set();
+      const publicKeys = new Set();
+      return tokens.map((token, index) => {
+        try {
+          if (!token.startsWith(KEY_PREFIX)) throw new Error('Use a Wichtele v2 public key.');
+          const parts = token.slice(KEY_PREFIX.length).split(':');
+          if (parts.length !== 2) throw new Error('Invalid public key.');
+          const username = decodeURIComponent(parts[0]);
+          if (!username.trim() || username !== username.trim() || username.length > 256 || encodeURIComponent(username) !== parts[0]) throw new Error('Invalid username.');
+          const publicBytes = fromBase64url(parts[1]);
+          if (publicBytes.length !== 32) throw new Error('Invalid public key length.');
+          if (usernames.has(username)) throw new Error('Duplicate username.');
+          if (publicKeys.has(parts[1])) throw new Error('Duplicate public key.');
+          usernames.add(username);
+          publicKeys.add(parts[1]);
+          return { username, publicBytes };
+        } catch (error) {
+          throw new Error('Key ' + (index + 1) + ': ' + error.message);
+        }
+      });
+    }
+
+    function randomBelow(limit) {
+      const range = 0x100000000;
+      const ceiling = range - range % limit;
+      const sample = new Uint32Array(1);
+      do { crypto.getRandomValues(sample); } while (sample[0] >= ceiling);
+      return sample[0] % limit;
+    }
+
+    function createMapping(count) {
+      if (!Number.isInteger(count) || count < 2 || count > 0xffffffff) throw new Error('Invalid participant count.');
+      let targets;
+      do {
+        targets = Array.from({ length: count }, (_, index) => index);
+        for (let position = count - 1; position > 0; position--) {
+          const swap = randomBelow(position + 1);
+          [targets[position], targets[swap]] = [targets[swap], targets[position]];
+        }
+      } while (targets.some((target, source) => target === source));
+      return targets;
+    }
+
+    async function encryptAssignment(publicBytes, username) {
+      const recipient = await crypto.subtle.importKey('raw', publicBytes, 'X25519', false, []);
+      const ephemeral = await crypto.subtle.generateKey('X25519', true, ['deriveBits']);
+      const nonce = crypto.getRandomValues(new Uint8Array(12));
+      const shared = new Uint8Array(await crypto.subtle.deriveBits({ name: 'X25519', public: recipient }, ephemeral.privateKey, 256));
+      try {
+        const material = await crypto.subtle.importKey('raw', shared, 'HKDF', false, ['deriveKey']);
+        const key = await crypto.subtle.deriveKey({ name: 'HKDF', hash: 'SHA-256', salt: nonce, info: encoder.encode(MESSAGE_PREFIX) }, material, { name: 'AES-GCM', length: 256 }, false, ['encrypt']);
+        const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: nonce, additionalData: encoder.encode(MESSAGE_PREFIX), tagLength: 128 }, key, encoder.encode(username));
+        const envelope = { ephemeral: base64url(await crypto.subtle.exportKey('raw', ephemeral.publicKey)), nonce: base64url(nonce), ciphertext: base64url(ciphertext) };
+        return MESSAGE_PREFIX + base64url(encoder.encode(JSON.stringify(envelope)));
+      } finally { shared.fill(0); }
+    }
+
+    async function copyAssignment(field, feedback, button) {
+      const value = field.value;
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(value);
+        } else {
+          field.focus();
+          field.select();
+          if (!document.execCommand('copy')) throw new Error('Clipboard unavailable.');
+        }
+        feedback.textContent = 'Copied to clipboard.';
+        feedback.dataset.state = 'success';
+        button.querySelector('span').textContent = 'Copied';
+      } catch {
+        field.focus();
+        field.select();
+        feedback.textContent = 'Clipboard unavailable. Selected text can be copied manually.';
+        feedback.dataset.state = 'error';
+      }
+    }
+
+    function resetResults() {
+      hasAssignments = false;
+      const empty = document.createElement('p');
+      empty.className = 'empty';
+      empty.textContent = 'No assignments yet.';
+      element('results').replaceChildren(empty);
+      element('result-count').textContent = '0 messages';
+      element('results-section').setAttribute('aria-busy', 'false');
+      element('draw').textContent = 'Create assignments';
+    }
+
+    function renderAssignments(assignments) {
+      const fragment = document.createDocumentFragment();
+      assignments.forEach((assignment, index) => {
+        const row = element('result-template').content.cloneNode(true);
+        const label = row.querySelector('label');
+        const field = row.querySelector('input');
+        const feedback = row.querySelector('.status');
+        const button = row.querySelector('button');
+        field.id = 'assignment-' + index;
+        feedback.id = 'copy-status-' + index;
+        field.setAttribute('aria-describedby', feedback.id);
+        label.htmlFor = field.id;
+        label.textContent = 'For ' + assignment.username;
+        field.value = assignment.message;
+        button.setAttribute('aria-label', 'Copy encrypted assignment for ' + assignment.username);
+        button.addEventListener('click', () => copyAssignment(field, feedback, button));
+        fragment.append(row);
+      });
+      element('results').replaceChildren(fragment);
+      element('result-count').textContent = assignments.length + ' messages';
+      hasAssignments = true;
+      element('draw').textContent = 'Regenerate assignments';
+    }
+
+    element('public-keys').addEventListener('input', () => {
+      ++drawVersion;
+      resetResults();
+      element('participant-count').textContent = keyTokens(element('public-keys').value).length + ' keys';
+      element('draw').disabled = !supported;
+      status(supported ? 'Ready to validate participants.' : 'Web Crypto unavailable. Use a current browser on a local file, localhost, or HTTPS.', supported ? '' : 'error');
+    });
+
+    element('draw').addEventListener('click', async () => {
+      if (hasAssignments && !window.confirm('Replace all encrypted assignments with a new random draw? Previously distributed messages will no longer match this draw.')) return;
+      const version = ++drawVersion;
+      resetResults();
+      element('draw').disabled = true;
+      element('results-section').setAttribute('aria-busy', 'true');
+      try {
+        const participants = parseParticipants(element('public-keys').value);
+        const targets = createMapping(participants.length);
+        const assignments = [];
+        for (let source = 0; source < participants.length; source++) {
+          if (version !== drawVersion) return;
+          status('Encrypting assignment ' + (source + 1) + ' of ' + participants.length + '...');
+          const message = await encryptAssignment(participants[source].publicBytes, participants[targets[source]].username);
+          assignments.push({ username: participants[source].username, message });
+        }
+        if (version !== drawVersion) return;
+        renderAssignments(assignments);
+        status('Assignments ready. Every participant gives once and receives once; no self-matches.', 'success');
+      } catch (error) {
+        if (version === drawVersion) status('No assignments created. ' + (error.name === 'OperationError' ? 'A public key cannot be used for encryption.' : error.message), 'error');
+      } finally {
+        if (version === drawVersion) {
+          element('draw').disabled = !supported;
+          element('results-section').setAttribute('aria-busy', 'false');
+        }
+      }
+    });
+
+    element('clear').addEventListener('click', () => {
+      ++drawVersion;
+      element('public-keys').value = '';
+      resetResults();
+      element('participant-count').textContent = '0 keys';
+      element('draw').disabled = !supported;
+      status(supported ? 'At least two participants required.' : 'Web Crypto unavailable. Use a current browser on a local file, localhost, or HTTPS.', supported ? '' : 'error');
+      element('public-keys').focus();
+    });
+
+    if (!supported) {
+      element('draw').disabled = true;
+      status('Web Crypto unavailable. Use a current browser on a local file, localhost, or HTTPS.', 'error');
+    }
+  </script>
+</body>
+</html>
