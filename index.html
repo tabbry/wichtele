@@ -53,6 +53,17 @@
     .sender { padding-top: 18px; }
     .sender label { margin-top: 16px; }
     .sender-actions { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 10px; }
+    #sender-tools { display: none; }
+    body:not([data-view="assignment"]) #operator { display: none; }
+    body[data-view="assignment"] #identity-section, body[data-view="assignment"] #message-section { display: none; }
+    body:not([data-view="decryption"]) #message-section { display: none; }
+    body[data-view="decryption"] #public-key-controls, body[data-view="decryption"] #identity-note, body[data-view="decryption"] #send-key-note, body[data-view="decryption"] #ciphertext-field { display: none; }
+    body[data-view="decryption"] .message-grid { grid-template-columns: 1fr; }
+    body[data-view="decryption"] #identity-heading { display: none; }
+    body[data-view="decryption"] #identity-section > .section-heading { display: none; }
+    body[data-view="assignment"] #operator > summary { display: none; }
+    #message-output[hidden] { display: none; }
+    .step { display: none; }
     details { padding-bottom: 20px; }
     .operator-body { padding-top: 20px; }
     .operator-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 20px 0 12px; }
@@ -82,7 +93,7 @@
   <header><div class="header-inner"><div class="brand">Wichtele<span style="color:var(--green)">.</span></div><div class="local">Local cryptography</div></div></header>
   <main>
     <div class="intro"><h1>Private messages</h1><span class="eyebrow">X25519 / AES-256-GCM</span></div>
-    <section aria-labelledby="identity-heading">
+    <section id="identity-section" aria-labelledby="identity-heading">
       <div class="section-heading"><span class="step" aria-hidden="true">1</span><h2 id="identity-heading">Your identity</h2></div>
       <form id="credentials" autocomplete="off">
         <div class="credentials">
@@ -90,20 +101,23 @@
           <div><label for="password">Password</label><input id="password" name="password" type="password" autocomplete="off" maxlength="4096"></div>
         </div>
       </form>
+      <div id="public-key-controls">
       <div class="field-heading"><label for="public-key">Public key</label><button id="copy-key" type="button" disabled title="Copy public key"><svg aria-hidden="true" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>Copy</button></div>
       <textarea id="public-key" class="mono" readonly spellcheck="false" aria-describedby="identity-status"></textarea>
+      </div>
       <p class="status" id="identity-status" role="status" aria-live="polite">Enter your credentials.</p>
-      <p class="security-note">Use a long, unique passphrase. Anyone with your public key can test password guesses offline. Forgotten credentials cannot be recovered. Usernames are case-sensitive; surrounding spaces are ignored.</p>
+      <p id="send-key-note">Send your public key to the operator. Keep your password private; you will need it to reveal your assignment.</p>
+      <p class="security-note" id="identity-note">Use a long, unique passphrase. Anyone with your public key can test password guesses offline. Forgotten credentials cannot be recovered. Usernames are case-sensitive; surrounding spaces are ignored.</p>
     </section>
-    <section aria-labelledby="message-heading">
+    <section id="message-section" aria-labelledby="message-heading">
       <div class="section-heading"><span class="step" aria-hidden="true">2</span><h2 id="message-heading">Open a message</h2></div>
       <div class="message-grid">
-        <div><div class="field-heading"><label for="encrypted-message">Encrypted message</label></div><textarea id="encrypted-message" class="mono" spellcheck="false" autocapitalize="none" aria-describedby="decrypt-status"></textarea></div>
-        <div><div class="field-heading"><label for="plaintext">Decrypted message</label><button id="copy-plaintext" type="button" disabled title="Copy decrypted message"><svg aria-hidden="true" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>Copy</button></div><textarea id="plaintext" readonly aria-describedby="decrypt-status"></textarea></div>
+        <div id="ciphertext-field"><div class="field-heading"><label for="encrypted-message">Encrypted message</label></div><textarea id="encrypted-message" class="mono" spellcheck="false" autocapitalize="none" aria-describedby="decrypt-status"></textarea></div>
+        <div id="message-output" hidden><div class="field-heading"><label for="plaintext">Your assignment</label><button id="copy-plaintext" type="button" disabled title="Copy decrypted message"><svg aria-hidden="true" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>Copy</button></div><textarea id="plaintext" readonly aria-describedby="decrypt-status"></textarea></div>
       </div>
       <p class="status" id="decrypt-status" role="status" aria-live="polite">No message loaded.</p>
     </section>
-    <details>
+    <details id="sender-tools">
       <summary>Encrypt a message</summary>
       <div class="sender">
         <label for="recipient">Recipient public key</label><input id="recipient" spellcheck="false" autocapitalize="none" autocomplete="off">
@@ -231,6 +245,7 @@
     }
 
     function clearPlaintext() {
+      element('message-output').hidden = true;
       element('plaintext').value = '';
       element('copy-plaintext').disabled = true;
     }
@@ -247,6 +262,7 @@
         const plaintext = await decryptMessage(currentIdentity.privateKey, message);
         if (version !== decryptVersion) return;
         element('plaintext').value = plaintext;
+        element('message-output').hidden = false;
         element('copy-plaintext').disabled = false;
         status('decrypt-status', 'Message decrypted. Sender identity is not verified.', 'success');
       } catch {
@@ -274,7 +290,7 @@
           identity = result;
           element('public-key').value = result.publicKey;
           element('copy-key').disabled = false;
-          status('identity-status', 'Public key ready.', 'success');
+          status('identity-status', document.body.dataset.view === 'decryption' ? 'Password entered.' : 'Public key ready.', 'success');
           await openMessage();
         } catch {
           if (version === identityVersion) status('identity-status', 'Key generation failed. Use a current browser with X25519 support in a secure context (local file, localhost, or HTTPS).', 'error');
@@ -360,6 +376,7 @@
       invalidateOutgoing();
       status('identity-status', 'Enter your credentials.');
       status('decrypt-status', 'No message loaded.');
+      loadMessageLink();
       element('username').focus();
     });
 
@@ -512,10 +529,18 @@
     });
 
     function loadMessageLink() {
-      if (!location.hash) return;
+      const params = new URLSearchParams(location.hash.slice(1));
+      const view = params.has('username') || params.has('message') ? 'decryption' : params.get('view') === 'assignment' ? 'assignment' : 'identity';
+      document.body.dataset.view = view;
+      const titles = { identity: 'Create your identity', assignment: 'Assignment desk', decryption: 'Reveal your assignment' };
+      document.querySelector('h1').textContent = titles[view];
+      document.title = 'Wichtele | ' + titles[view];
+      element('operator').open = view === 'assignment';
+      element('username').readOnly = view === 'decryption';
       ++identityVersion;
       ++decryptVersion;
       clearTimeout(identityTimer);
+      clearTimeout(decryptTimer);
       identity = null;
       element('password').value = '';
       element('username').value = '';
@@ -523,9 +548,11 @@
       element('encrypted-message').value = '';
       element('copy-key').disabled = true;
       clearPlaintext();
+      status('identity-status', 'Enter your credentials.');
+      status('decrypt-status', 'No message loaded.');
+      if (view !== 'decryption') return;
       try {
         if (location.hash.length > MAX_ENVELOPE_LENGTH + 10000) throw new Error('Link is too large.');
-        const params = new URLSearchParams(location.hash.slice(1));
         const username = params.get('username');
         const message = params.get('message');
         if (!username || username !== username.trim() || username.length > 256 || !message || message.length > MAX_ENVELOPE_LENGTH || !message.startsWith(MESSAGE_PREFIX)) throw new Error('Invalid message link.');

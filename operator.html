@@ -7,7 +7,7 @@
   <title>Wichtele | Assignment desk</title>
   <script>
     const destination = new URL('index.html', location.href);
-    destination.hash = location.hash;
+    destination.hash = location.hash || 'view=assignment';
     location.replace(destination.href);
   </script>
   <style>
